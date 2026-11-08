@@ -1,0 +1,122 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+def appLinkHost = (project.findProperty('mdm.appLinkHost') ?: 'mdm.example.com').toString()
+// Monotonic version code for upgrades (CI passes -Pmdm.versionCode=<run number>).
+def appVersionCode = (project.findProperty('mdm.versionCode') ?: '1').toString().toInteger()
+
+// ---------------------------------------------------------------- stable signing
+// Device-owner provisioning pins the signing certificate (PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM)
+// and upgrades need the same key, so every build should be signed with ONE stable keystore.
+// Values come from the environment first, then apps/android/keystore.properties (gitignored):
+//   MDM_KEYSTORE_PATH, MDM_KEYSTORE_PASSWORD, MDM_KEY_ALIAS, MDM_KEY_PASSWORD
+def keystoreProps = new Properties()
+def keystorePropsFile = rootProject.file('keystore.properties')
+if (keystorePropsFile.exists()) keystorePropsFile.withInputStream { keystoreProps.load(it) }
+def signingValue = { String name ->
+    def v = System.getenv(name)
+    (v != null && !v.isEmpty()) ? v : keystoreProps.getProperty(name)
+}
+def keystorePath = signingValue('MDM_KEYSTORE_PATH')
+def keystoreFile = keystorePath ? rootProject.file(keystorePath) : null
+def hasStableKeystore = keystoreFile != null && keystoreFile.exists() &&
+        signingValue('MDM_KEYSTORE_PASSWORD') && signingValue('MDM_KEY_ALIAS')
+if (!hasStableKeystore) {
+    logger.warn("MDM: no stable keystore configured (MDM_KEYSTORE_* / keystore.properties). " +
+            "Debug uses the default debug key; release is unsigned.")
+}
+
+android {
+    namespace 'com.mdmplatform.agent'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.mdmplatform.agent"
+        minSdk 26
+        targetSdk 34
+        versionCode appVersionCode
+        versionName "1.0.0"
+
+        manifestPlaceholders = [appLinkHost: appLinkHost]
+        buildConfigField "String", "APP_LINK_HOST", "\"${appLinkHost}\""
+
+        vectorDrawables { useSupportLibrary true }
+    }
+
+    signingConfigs {
+        if (hasStableKeystore) {
+            mdm {
+                storeFile keystoreFile
+                storePassword signingValue('MDM_KEYSTORE_PASSWORD')
+                keyAlias signingValue('MDM_KEY_ALIAS')
+                keyPassword(signingValue('MDM_KEY_PASSWORD') ?: signingValue('MDM_KEYSTORE_PASSWORD'))
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            if (hasStableKeystore) signingConfig signingConfigs.mdm
+            // Cleartext (http/ws) is only permitted in debug builds, through
+            // src/debug/res/xml/network_security_config.xml.
+            buildConfigField "boolean", "ALLOW_CLEARTEXT", "true"
+        }
+        release {
+            if (hasStableKeystore) signingConfig signingConfigs.mdm
+            minifyEnabled false
+            buildConfigField "boolean", "ALLOW_CLEARTEXT", "false"
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    buildFeatures {
+        compose true
+        buildConfig true
+    }
+    composeOptions {
+        // Compose compiler 1.5.10 pairs with Kotlin 1.9.22.
+        kotlinCompilerExtensionVersion '1.5.10'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions { jvmTarget = '17' }
+
+    packagingOptions {
+        resources { excludes += '/META-INF/{AL2.0,LGPL2.1}' }
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.activity:activity-compose:1.8.2'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-compose:2.7.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0'
+    implementation 'androidx.lifecycle:lifecycle-process:2.7.0'
+
+    implementation platform('androidx.compose:compose-bom:2024.02.00')
+    implementation 'androidx.compose.ui:ui'
+    implementation 'androidx.compose.ui:ui-tooling-preview'
+    implementation 'androidx.compose.material3:material3'
+    implementation 'androidx.compose.material:material-icons-extended'
+    debugImplementation 'androidx.compose.ui:ui-tooling'
+
+    // Keystore-backed encrypted storage for device credentials
+    implementation 'androidx.security:security-crypto:1.1.0-alpha06'
+
+    // Google code scanner (QR). Runs in Play services, needs no CAMERA permission.
+    implementation 'com.google.android.gms:play-services-code-scanner:16.1.0'
+
+    // HTTP + WebSocket
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+
+    // WebRTC (proven in the prototype)
+    implementation 'io.github.webrtc-sdk:android:114.5735.02'
+
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
+}

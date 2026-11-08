@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- DEBUG BUILDS ONLY. Allows http:// and ws:// so the app can reach a dev API on
+     localhost, the emulator host (10.0.2.2) or a LAN IP (192.168.x.x / 10.x.x.x).
+     Private LAN ranges cannot be expressed as domain wildcards, so cleartext is
+     permitted globally here. Release builds use src/main/res/xml/network_security_config.xml. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

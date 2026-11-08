@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Rebrand here. -->
+    <string name="app_name">MDM Agent</string>
+    <string name="device_admin_description">Lets your organisation confirm this device is managed and lock it remotely. On company-owned (fully managed) devices it can also erase the device and enforce screen-lock and camera rules. On personal devices it never erases data or changes those settings.</string>
+
+    <string name="accessibility_label">MDM Agent remote control</string>
+    <string name="accessibility_description">Lets your IT support tap, swipe and type on this screen during a screen-sharing session that you approve, and only if you choose "Share screen and allow control" for that session. A red "Remote control active" bar and notification are shown the whole time, with a Stop control button. It does nothing outside such a session and does not collect, store or send screen content, typing or accessibility events. Screen sharing works without it.</string>
+
+    <string name="channel_agent">Connection status</string>
+    <string name="channel_agent_desc">Shows that this device is connected to your organisation.</string>
+    <string name="channel_screen_request">Screen-sharing requests</string>
+    <string name="channel_screen_request_desc">Alerts you when an administrator asks to view your screen.</string>
+    <string name="channel_sharing">Active screen sharing</string>
+    <string name="channel_sharing_desc">Shown for as long as your screen is being shared.</string>
+    <string name="channel_messages">Support messages</string>
+    <string name="channel_messages_desc">Messages from your IT support team.</string>
+</resources>

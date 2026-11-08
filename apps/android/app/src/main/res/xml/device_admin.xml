@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Policies the agent may use (PROTOCOL.md §10, §11). Android lists them to the user when a plain
+     device admin is activated. On personal devices the agent never wipes or applies password/camera
+     policies; those are enforced only on company-owned, fully managed (device owner) devices.
+     force-lock      DevicePolicyManager.lockNow / setMaximumTimeToLock
+     wipe-data       DevicePolicyManager.wipeData (wipeDevice on API 34+ as device owner)
+     limit-password  setPasswordQuality / setPasswordMinimumLength (below API 31)
+     disable-camera  setCameraDisabled
+     reset-password is deliberately not declared. -->
+<device-admin>
+    <uses-policies>
+        <force-lock />
+        <wipe-data />
+        <limit-password />
+        <disable-camera />
+    </uses-policies>
+</device-admin>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Remote control (PROTOCOL.md §9). Minimal configuration:
+     - canPerformGestures: taps, long presses and swipes from the support person.
+     - canRetrieveWindowContent: only to find the focused text field when typing text.
+     - one event type is required by the framework; events are ignored, never read or sent.
+     - isAccessibilityTool=false: this is a remote-support tool, not an assistive technology. -->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:accessibilityEventTypes="typeWindowStateChanged"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagDefault"
+    android:canPerformGestures="true"
+    android:canRetrieveWindowContent="true"
+    android:description="@string/accessibility_description"
+    android:isAccessibilityTool="false"
+    android:notificationTimeout="1000"
+    tools:ignore="UnusedAttribute" />
