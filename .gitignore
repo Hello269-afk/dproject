@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.env
+.DS_Store
+data/
+.tools/
+*.apk
+*.log
+apps/android/local.properties
+apps/android/.gradle/
+apps/android/build/
+apps/android/app/build/
+.claude/settings.local.json

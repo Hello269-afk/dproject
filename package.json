@@ -1,0 +1,12 @@
+{
+  "name": "mdm-platform",
+  "private": true,
+  "scripts": {
+    "install:all": "npm --prefix apps/api install && npm --prefix apps/web install",
+    "dev:api": "npm --prefix apps/api run dev",
+    "dev:web": "npm --prefix apps/web run dev",
+    "build": "npm --prefix apps/web run build && npm --prefix apps/api run build",
+    "start": "npm --prefix apps/api start",
+    "test": "npm --prefix apps/api test"
+  }
+}
